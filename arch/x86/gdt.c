@@ -1,3 +1,5 @@
+#include <so/sched.h>
+
 struct Gdt
 {
     unsigned short limit;
@@ -31,14 +33,28 @@ void setGdtDescriptor(long n, unsigned short limit, long base, unsigned char acc
     Gdt->base_high = (long)base >> 24 & 0xFF;
 }
 
+void setTSSDescriptor(struct task_struct* task)
+{
+    setGdtDescriptor(task->pid+4, sizeof(task->tss) - 1, (long)&task->tss, 0x89, 0x00);
+}
+
 void GdtInstall()
 {
     setGdtDescriptor(0, 0, 0, 0, 0);
     setGdtDescriptor(1, 0xFFFF, 0, 0x9B, 0xCF);
     setGdtDescriptor(2, 0xFFFF, 0, 0x93, 0xCF);
 
+    struct tss tss;
+    tss.esp0 = 0x600000;
+    tss.ss0 = 0x10;
+    setGdtDescriptor(3, sizeof(tss) - 1, (long)&tss, 0x89, 0x00);
+
     gdtr.limit = sizeof(gdt_table) - 1;
     gdtr.base = (long)gdt_table;
 
     __asm__ volatile ("lgdt %0" :: "m"(gdtr));
+    __asm__ volatile (
+        "mov $0x18, %ax\n\t"
+        "ltr %ax\n\t"
+    );
 }

@@ -45,6 +45,15 @@ void clock_handler()
     outb(0x20, 0x20);
 }
 
+char keyboard_buffer[1024];
+long pos = 0;
+
+void addCharacter(char c)
+{
+    keyboard_buffer[pos++] = c;
+    keyboard_buffer[pos] = '\0';
+}
+
 void keyboard_handler()
 {
     unsigned char scancode = insb(0x60);
@@ -61,7 +70,15 @@ void keyboard_handler()
 
     } else
     {
-        put_c(scancode_to_ascii[scancode]);
+        if (scancode_to_ascii[scancode] != '\n')
+        {
+            put_c(scancode_to_ascii[scancode]);
+            addCharacter(scancode_to_ascii[scancode]);
+
+        } else
+        {
+            printk("\n# ");
+        }
     }
 
     outb(0x20, 0x20);
