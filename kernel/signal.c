@@ -15,7 +15,12 @@ void psig()
 {
     if (current->signal & (1U << SIGINT))
     {
-        printk("* SIGINT signal for process with PID=%i", current->pid);
+        printk("* SIGINT signal for process with PID=%i *", current->pid);
         current->signal &= ~(1U << SIGINT);
+    
+    } else if (current->signal & (1U << SIGALRM))
+    {
+        printk("* SIGALRM signal for process with PID=%i *", current->pid);
+        current->signal &= ~(1U << SIGALRM);
     }
 }

@@ -26,6 +26,7 @@ void tasking2()
 
 void tasking3()
 {
+    alarm(3);
     printk("\nTask3!");
 }
 

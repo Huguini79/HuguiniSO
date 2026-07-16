@@ -1,5 +1,7 @@
 #include <so/ioport.h>
 #include <so/panic.h>
+#include <so/signal.h>
+#include <so/alarm.h>
 
 struct Idt
 {
@@ -38,6 +40,19 @@ void clock_handler()
 {
     outb(0x20, 0x20);
     ticks += 6;
+
+    for (long i = 0; i < 64; ++i)
+    {
+        if (callouts[i].ticks != 0)
+        {
+            if (callouts[i].ticks <= ticks)
+            {
+                sendsig(callouts[i].task, SIGALRM);
+                callouts[i].ticks = 0;
+            }
+        }
+    }
+
     schedule();
 }
 

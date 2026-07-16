@@ -75,6 +75,11 @@ void schedule()
         }
     }
 
+    if (current->signal != 0)
+    {
+        psig();
+    }
+
     current->state = Ready;
     current = next;
     current->state = Running;
