@@ -2,12 +2,30 @@
 
 #include <libc/string.h>
 
-void printk(const char* str)
+#include <stdarg.h>
+
+void printk(const char* fmt, ...)
 {
-    size_t len = strlen(str);
+    va_list args;
+    char buf[16];
+    size_t len = strlen(fmt);
+
+    va_start(args, fmt);
 
     for (long i = 0; i < len; ++i)
     {
-        put_c(str[i]);
+        if (fmt[i] == '%')
+        {
+            i++;
+            if (fmt[i] == 'i')
+            {
+                int num = va_arg(args, int);
+                itoa(num, buf, 10);
+                printk(buf);
+            }
+        } else
+        {
+            put_c(fmt[i]);
+        }
     }
 }

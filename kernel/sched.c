@@ -23,14 +23,14 @@ struct task_struct* initTask(long pid, long eip)
     newTask->signal = 0;
     newTask->state = Ready;
     uintptr_t* kernel_stack_top = 0x600000 + (pid * 4096) + 4096;
-    newTask->tss.esp0 = (long)kernel_stack_top;
+    newTask->tss.esp0 = kernel_stack_top;
     newTask->tss.ss0 = 0x10;
-    newTask->tss.eip = eip;
+    newTask->tss.eip = (long)eip;
     newTask->tss.eflags = 0x202;
     uintptr_t* user_stack_top = 0x3FF00 + (pid * 8192) + 8192;
     *user_stack_top--;
     *user_stack_top = blank;
-    newTask->tss.esp = (long)user_stack_top;
+    newTask->tss.esp = user_stack_top;
     newTask->tss.eax = 0;
     newTask->tss.ecx = 0;
     newTask->tss.edx = 0;
@@ -59,6 +59,31 @@ void schedule()
         * como el algoritmo Round Robin.
         * Esta es una implementación de un Round Robin básico.
     */
+    if (tasks[current->pid+1].tss.eip != 0)
+    {
+        next = &tasks[current->pid+1];
+    
+    } else
+    {
+        for (long n = 0; n < 64; ++n)
+        {
+            if (tasks[n].tss.eip != 0)
+            {
+                next = &tasks[n];
+                break;
+            }
+        }
+    }
+
+    current->state = Ready;
+    current = next;
+    current->state = Running;
+
+    if (current->tss.eip != 0)
+    {
+        exec(current);
+    }
+
 }
 
 int sys_fork()
@@ -78,7 +103,7 @@ int exec(struct task_struct* task)
             unsigned short selector;
 
         } __attribute__((packed)) _tmp;
-        
+
         _tmp.offset = 0;
         _tmp.selector = selector;
 

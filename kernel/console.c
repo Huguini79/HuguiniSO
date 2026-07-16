@@ -15,6 +15,11 @@ void ConsoleInstall()
     clear();
 }
 
+void put_cxy(char c, int x, int y)
+{
+    video_mem[(y * VGA_WIDTH) + x] = DEFAULT_FONT << 8 | c;
+}
+
 void put_c(char c)
 {
     if (x > VGA_WIDTH)

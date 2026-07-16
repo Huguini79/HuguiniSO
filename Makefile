@@ -29,7 +29,7 @@ all: $(KERNEL)
 
 # Enlazado final
 $(KERNEL): $(ALL_OBJS)
-	$(LD) $(LDFLAGS) -o $@ $(ALL_OBJS)
+	$(LD) -Map=kernel.map $(LDFLAGS) -o $@ $(ALL_OBJS)
 	grub-mkrescue -o HuguiniSO.iso iso/
 	qemu-system-x86_64 HuguiniSO.iso
 

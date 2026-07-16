@@ -32,6 +32,11 @@ struct tss
 
 } __attribute__((packed));
 
+struct sigaction
+{
+    void* handler;
+};
+
 enum State
 {
     Ready,
@@ -48,7 +53,8 @@ struct task_struct
     long ppid; /* Proceso padre */
     long alarm; /* Alarma */
     long signal; /* Señales */
-    enum State state;
+    enum State state; /* Estado del proceso */
+    struct sigaction sigactions[32]; /* Handlers personalizados para señales */
     struct tss tss; /* Contexto del proceso */
 };
 
